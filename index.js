@@ -10,7 +10,7 @@ const { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes, nextISSTimesForMyLocat
 //   console.log('It worked! Returned IP:' , ip);
 // });
 
-// fetchCoordsByIP("24.80.160.16",(error, data) => {
+// fetchCoordsByIP("16.16.160.16",(error, data) => {
 //     //ip is fake
 //   if (error) {
 //     console.log(error);
