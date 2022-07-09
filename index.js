@@ -1,4 +1,3 @@
-
 const { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes, nextISSTimesForMyLocation } = require('./iss');
 
 // fetchMyIP((error, ip) => {
