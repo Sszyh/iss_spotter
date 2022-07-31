@@ -4,38 +4,30 @@ const request = require('request-promise-native');
 //const { fetchISSFlyOverTimes } = require('./iss');
 
 const fetchMyIp = function() {
-  return request("https://api.ipify.org?format=json");
+  return request("https://api64.ipify.org?format=json");
 }
 
 const fetchCoordsByIP = function(body) {
-  const ip = JSON.parse(body).ip;
-
-  return request(`http://ipwho.is/${ip}`);
- 
+  const data = JSON.parse(body).ip;
+  return request(`http://ipwho.is/${data}`);
 }
 
-const fetchISSFlyOverTimes = function(body) {
-  const { latitude, longitude } = JSON.parse(body);
-  //console.log("bo000000000000000000000000000dy",body);
-  const url = `http://api.open-notify.org/iss-pass.json?lat=${latitude}&lon=${longitude}`;
-  return request(url);
+const fetchISSFlyOverTimes = function(loc) {
+  const {latitude, longitude} = JSON.parse(loc);
+  return request(`https://iss-pass.herokuapp.com/json/?lat=${latitude}&lon=${longitude}`)
 }
 
 const nextISSTimesForMyLocation = function() {
+  
   return fetchMyIp()
-    .then(fetchCoordsByIP)
-    .then(fetchISSFlyOverTimes)
-    .then((data) => {
-      const { response } = JSON.parse(data);
-      return response;
-    });
-};
+  .then(fetchCoordsByIP)
+  .then(fetchISSFlyOverTimes)
+  .then((data) => {
+    const output = JSON.parse(data).response;
+    console.log(output)
+    return output;
+  });
+  
+}
 
-
-
-module.exports = { nextISSTimesForMyLocation };
-
-//fetchMyIp, fetchCoordsByIP, fetchISSFlyOverTimes,nextISSTimesForMyLocation
-
-
-
+module.exports = {nextISSTimesForMyLocation};
