@@ -1,128 +1,73 @@
 const request = require('request');
 
-
 const fetchMyIP = function(callback) {
-  
-  let url = `https://api.ipify.org?format=json`;
+  let url = `https://api64.ipify.org?format=json`;
   request(url, function(error, response, body) {
-
-    if (error) {
-      callback(error, null);
-      return;
-    }
+    if (error) return callback(error, null);//error may come from a invalid domain, user is offline.
+     
     // if non-200 status, assume server error
     if (response.statusCode !== 200) {
+      //if console "response" here, we will receive a huge obj and response.
       const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
       callback(Error(msg), null);
       return;
     }
-    const data = JSON.parse(body);
-    callback(null,data["ip"]);
-  
+    const ip = JSON.parse(body).ip;
+    callback(null, ip);
   });
 };
 
 const fetchCoordsByIP = function(ip, callback) {
-  
   let url = `http://ipwho.is/${ip}`;
   request(url, function(error, response, body) {
-    if (error) {
-      callback(error, null);
-      return;
-    }
-    //console.log("body",body);
+    if (error) return callback(error, null);
+
     const data = JSON.parse(body);
-    if (data.success === false) {
-      callback(data, null);
+    if (!data.success) {
+      const message = `Success status was ${data.success}. Server message says: ${data.message} when fetching for IP ${data.ip}`;
+      callback(Error(message), null);
       return;
     }
-
-
-    callback(null,data);
+    //destructure
+    const {latitude, longitude} = data;
+    callback(null, {latitude, longitude});
   });
 };
 
-
-
 const fetchISSFlyOverTimes = function(coords, callback) {
-  const { latitude, longitude } = coords;
-  //console.log(latitude);
-  let url = `https://iss-pass.herokuapp.com/json/?lat=${latitude}&lon=${longitude}`;
-  request(url, function(error, response, body) {
+
+  let url = `https://iss-pass.herokuapp.com/json/?lat=${coords.latitude}&lon=${coords.longitude}`;
+  request(url, (error, response, body) => {
+    if (error) return callback(error, null);
     
-    
-    
-    if (error) {
-      callback(error, null);
-      return;
-    }
     if (response.statusCode !== 200) {
-      const msg = `Status Code ${response.statusCode} when fetching flyovertime. Response: ${body}`;
+      const msg = `Status Code ${response.statusCode} when fetching Overtime Response: ${body}`;
       callback(Error(msg), null);
       return;
     }
     const data = JSON.parse(body);
-
-    callback(null,data);
+    const resp = data.response;
+    callback(null, resp);
   });
 };
 
-
-/**
- * Orchestrates multiple API requests in order to determine the next 5 upcoming ISS fly overs for the user's current location.
- * Input:
- *   - A callback with an error or results.
- * Returns (via Callback):
- *   - An error, if any (nullable)
- *   - The fly-over times as an array (null if error):
- *     [ { risetime: <number>, duration: <number> }, ... ]
- */
-
-
 const nextISSTimesForMyLocation = function(callback) {
-
-  fetchMyIP((error, ip) => {
-   
-    if (error) {
+  fetchMyIP((err, ip) => {
+    if (err) {
       return callback(error, null);
-    }
-    fetchCoordsByIP(ip, (error, laLg) => {
-      if (error) {
+    } 
+    fetchCoordsByIP(ip, (err, location) => {
+      if(err) {
         return callback(error, null);
-      }
-      fetchISSFlyOverTimes(laLg,(error, data) => {
-        if (error) {
-          return callback(error, null);
-        }
-        callback(null, data);
+      } 
+      fetchISSFlyOverTimes(location, (err, time) => {
+        if (err) {
+          return callback(error, null)
+        } 
+        callback(null, time)
       });
     });
   });
-
-};
-
-
-// const nextISSTimesForMyLocation = function(callback) {
-//   fetchMyIP((error, ip) => {
-//     if (error) {
-//       return callback(error, null);
-//     }
-
-//     fetchCoordsByIP(ip, (error, loc) => {
-//       if (error) {
-//         return callback(error, null);
-//       }
-
-//       fetchISSFlyOverTimes(loc, (error, nextPasses) => {
-//         if (error) {
-//           return callback(error, null);
-//         }
-
-//         callback(null, nextPasses);
-//       });
-//     });
-//   });
-// };
-
+}
 
 module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes, nextISSTimesForMyLocation };
