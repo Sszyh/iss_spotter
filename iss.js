@@ -13,8 +13,9 @@ const fetchMyIP = function(callback) {
       return;
     }
     const ip = JSON.parse(body).ip;
+    console.log("inside fetchMyIp3");
     callback(null, ip);
-    console.log("inside fetchMyIp1");//to help how callback works
+    console.log("3-inside fetchMyIp1");//to help how callback works
   });
   console.log("1-inside fetchMyIp2");//to help how callback works
 };
@@ -35,7 +36,7 @@ const fetchCoordsByIP = function(ipp, callback) {
     callback(null, {latitude, longitude});
     console.log("inside fetchCoords1");//to help how callback works
   });
-  console.log("inside fetchCoords2");//to help how callback works
+  console.log("5-inside fetchCoords2");//to help how callback works
 };
 
 const fetchISSFlyOverTimes = function(coords, callback) {
@@ -62,20 +63,24 @@ const nextISSTimesForMyLocation = function(callback) {
     if (err) {
       return callback(error, null);
     } 
+    console.log("inside next-fetch");//to help how callback works
     fetchCoordsByIP(ip, (err, location) => {
       if(err) {
         return callback(error, null);
       } 
+      console.log("inside next-coord");//to help how callback works
       fetchISSFlyOverTimes(location, (err, time) => {
         if (err) {
           return callback(error, null)
         } 
-        callback(null, time)
+        console.log("inside next-overtime1");//to help how callback works
+        callback(null, time);
+        console.log("inside next-overtime2")
       });
     });
-    console.log("inside next1");//to help how callback works
+    console.log("4-inside next1");//to help how callback works
   });
-  console.log("inside next2");//to help how callback works
+  console.log("2-inside next2");//to help how callback works
 }
 
 module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes, nextISSTimesForMyLocation };
