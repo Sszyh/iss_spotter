@@ -16,6 +16,7 @@ const loanOut = function(amount) {
         revolve(amount);
       } else {
         revolve(creditLimit);
+        creditLimit = 0;
       }
     }
   });
